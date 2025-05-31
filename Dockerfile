@@ -4,8 +4,6 @@ WORKDIR /app
 
 COPY /app .
 
-RUN chmod +x ./gradlew
+RUN ["./gradlew", "clean", "build"]
 
-RUN ./gradlew clean build
-
-CMD ["./gradlew", "bootRun"]
+CMD ["./gradlew", "run"]
