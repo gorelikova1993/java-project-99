@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN ["./gradlew", "clean", "build", "--stacktrace"]
+RUN ["./gradlew", "clean", "build"]
 
 CMD ["./gradlew", "bootRun"]
