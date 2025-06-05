@@ -2,13 +2,24 @@ package hexlet.code.app.initializer;
 
 import hexlet.code.app.model.User;
 import hexlet.code.app.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
+import static java.rmi.server.LogStream.log;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
-    
+    @Autowired
     private UserRepository userRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
+
     
     @Override
     public void run(String... args) throws Exception {
@@ -21,7 +32,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode(adminPassword));
             
             userRepository.save(admin);
-            System.out.println("Admin was created: " + admin.getEmail());
+
         } else {
             System.out.println("The user is already exist: " + adminEmail);
         }

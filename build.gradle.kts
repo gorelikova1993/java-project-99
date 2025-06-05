@@ -33,12 +33,17 @@ dependencies {
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
 	runtimeOnly("com.h2database:h2")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testImplementation("org.instancio:instancio-junit:5.4.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testImplementation("com.jayway.jsonpath:json-path:2.9.0")
+	implementation("net.datafaker:datafaker:2.4.2")
 }
 
 
