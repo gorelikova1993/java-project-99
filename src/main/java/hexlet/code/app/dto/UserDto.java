@@ -13,8 +13,14 @@ public class UserDto {
     private String lastName;
     private String email;
     private LocalDateTime createdAt;
+    
+    public UserDto() {
+    }
 
     public UserDto(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.email = user.getEmail();

@@ -45,8 +45,8 @@ public class UserController {
     }
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto dto) {
-        var user = userMapper.toEntity(dto);
-        userRepository.save(user);
+        var user = userMapper.toEntity(dto, passwordEncoder);
+        user = userRepository.save(user);
         return ResponseEntity.status(201).body(userMapper.toDto(user));
     }
     @PutMapping("/{id}")

@@ -43,7 +43,11 @@ dependencies {
 	testImplementation("org.instancio:instancio-junit:5.4.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testImplementation("com.jayway.jsonpath:json-path:2.9.0")
+	testImplementation("org.springframework.security:spring-security-test")
+	testImplementation("net.javacrumbs.json-unit:json-unit-assertj:3.2.2")
+	testImplementation("org.springframework.security:spring-security-oauth2-resource-server")
 	implementation("net.datafaker:datafaker:2.4.2")
+	implementation("org.springframework.security:spring-security-oauth2-jose")
 }
 
 
