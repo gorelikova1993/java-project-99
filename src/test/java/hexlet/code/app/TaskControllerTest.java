@@ -138,4 +138,46 @@ public class TaskControllerTest {
         // Проверяем, что задача была удалена из базы
         mockMvc.perform(get("/api/tasks/{id}", task.getId()).with(jwt().jwt(jwt -> jwt.claim("sub", testUser.getEmail())))).andExpect(status().isNotFound());
     }
+    
+    @Test
+    void testFilterByTitleCont() throws Exception {
+        // Дополнительная задача, чтобы убедиться, что фильтрация работает
+        Task extraTask = new Task();
+        extraTask.setName("Create login form");
+        extraTask.setDescription("Another task");
+        extraTask.setTaskStatus(taskStatus);
+        extraTask.setAssignee(testUser);
+        extraTask.setIndex(99);
+        taskRepository.save(extraTask);
+        
+        // Фильтрация по слову "Create"
+        var result = mockMvc.perform(get("/api/tasks")
+                        .param("titleCont", "Create")
+                        .with(jwt().jwt(jwt -> jwt.claim("sub", testUser.getEmail()))))
+                .andExpect(status().isOk())
+                .andReturn();
+        
+        var body = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        
+        // Проверяем, что в ответе только одна задача
+        assertThatJson(body).isArray().hasSize(1);
+        assertThatJson(body).node("[0].name").isEqualTo("Create login form");
+    }
+    
+    @Test
+    void testFilterByAssigneeAndStatus() throws Exception {
+        // Фильтрация по существующему исполнителю и статусу
+        var result = mockMvc.perform(get("/api/tasks")
+                        .param("assigneeId", testUser.getId().toString())
+                        .param("status", "to_review")
+                        .with(jwt().jwt(jwt -> jwt.claim("sub", testUser.getEmail()))))
+                .andExpect(status().isOk())
+                .andReturn();
+        
+        var body = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        
+        // Ожидаем, что вернётся исходная задача
+        assertThatJson(body).isArray().hasSize(1);
+        assertThatJson(body).node("[0].name").isEqualTo("Test title");
+    }
 }

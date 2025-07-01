@@ -17,35 +17,31 @@ import java.util.ArrayList;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
-    
     public JwtFilter(JwtUtils jwtUtils) {
         this.jwtUtils = jwtUtils;
     }
-    private final Logger LOGGER = LoggerFactory.getLogger(JwtFilter.class);
+    private final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        
         String authHeader = request.getHeader("Authorization");
-        
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            LOGGER.info("Token received: {}", token);
+            logger.info("Token received: {}", token);
             try {
                 String email = jwtUtils.extractEmail(token);
-                LOGGER.info("Extracted email: {}", email);
+                logger.info("Extracted email: {}", email);
                 var authentication = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
-                LOGGER.error("JWT authentication failed: {}", e.getMessage());
+                logger.error("JWT authentication failed: {}", e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT");
                 return;
             }
         }
-        
         filterChain.doFilter(request, response);
     }
 }
