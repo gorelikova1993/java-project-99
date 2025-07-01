@@ -11,5 +11,4 @@ public class TaskUpdateDTO {
     private String title;
     private String content;
     private Set<Long> labelIds;
-    
 }

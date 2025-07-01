@@ -31,47 +31,39 @@ import java.util.List;
 public class TaskController {
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
-    
     @GetMapping
     public List<Task> getAll(@RequestParam(required = false) String titleCont,
                              @RequestParam(required = false) Long assigneeId,
                              @RequestParam(required = false) String status,
                              @RequestParam(required = false) Long labelId) {
-        
-        
         Specification<Task> spec = allOf(
                 TaskSpecification.hasTitleContaining(titleCont),
                 TaskSpecification.hasAssigneeId(assigneeId),
                 TaskSpecification.hasStatusSlug(status),
                 TaskSpecification.hasLabelId(labelId)
         );
-        
         return taskRepository.findAll(spec);
     }
-    
     @GetMapping("/{id}")
     public ResponseEntity<Task> get(@PathVariable Long id) {
         return taskRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Task> create(@Valid @RequestBody TaskCreateDTO taskCreateDTO) {
         Task task = taskMapper.toEntity(taskCreateDTO);
         return ResponseEntity.ok(taskRepository.save(task));
     }
-    
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Task> update(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO taskUpdateDTO) {
         Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + id));;
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + id));
         task = taskMapper.toEntity(taskUpdateDTO, task);
         return ResponseEntity.ok(taskRepository.save(task));
     }
-    
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

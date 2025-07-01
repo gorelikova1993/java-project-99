@@ -36,7 +36,6 @@ public class Task {
     private User assignee;
     @CreatedDate
     private LocalDate createdAt;
-    
     @ManyToMany
     @JoinTable(
             name = "task_labels",
@@ -44,5 +43,4 @@ public class Task {
             inverseJoinColumns = @JoinColumn(name = "label_id")
     )
     private Set<Label> labels = new HashSet<>();
-    
 }

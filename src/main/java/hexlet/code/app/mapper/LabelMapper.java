@@ -14,13 +14,11 @@ public class LabelMapper {
         dto.setCreatedAt(label.getCreatedAt());
         return dto;
     }
-    
     public Label fromCreateDto(LabelCreateDTO dto) {
         Label label = new Label();
         label.setName(dto.getName());
         return label;
     }
-    
     public Label fromDto(LabelDTO dto) {
         Label label = new Label();
         label.setId(dto.getId());
@@ -28,7 +26,6 @@ public class LabelMapper {
         label.setCreatedAt(dto.getCreatedAt());
         return label;
     }
-    
     public void update(Label label, LabelUpdateDTO dto) {
         label.setName(dto.getName());
     }

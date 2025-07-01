@@ -43,11 +43,10 @@ public class UserControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
     private User testUser;
-    
     @BeforeEach
     public void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
-        
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac).
+                defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
         userRepository.deleteAll(); // очистка БД
         // Сохраняем тестового пользователя
         testUser = new User();
@@ -57,23 +56,21 @@ public class UserControllerTest {
         testUser.setPassword(passwordEncoder.encode("secret"));
         testUser = userRepository.save(testUser);
     }
-    
     @Test
     void testGetAllUsers() throws Exception {
-        var result = mockMvc.perform(get("/api/users").with(jwt())).andExpect(status().isOk()).andReturn();
-        
+        var result = mockMvc.perform(get("/api/users")
+                .with(jwt())).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
         assertThatJson(body).isArray();
     }
-    
     @Test
     void testGetUserById() throws Exception {
-        var result = mockMvc.perform(get("/api/users/{id}", testUser.getId()).with(jwt())).andExpect(status().isOk()).andReturn();
-        
+        var result = mockMvc.perform(get("/api/users/{id}", testUser.getId()).
+                with(jwt())).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
-        assertThatJson(body).and(json -> json.node("email").isEqualTo(testUser.getEmail()), json -> json.node("firstName").isEqualTo(testUser.getFirstName()));
+        assertThatJson(body).and(json -> json.node("email").isEqualTo(testUser.getEmail()),
+                json -> json.node("firstName").isEqualTo(testUser.getFirstName()));
     }
-    
     @Test
     void testCreateUser() throws Exception {
         var dto = new UserCreateDto();
@@ -81,16 +78,12 @@ public class UserControllerTest {
         dto.setPassword("password");
         dto.setFirstName("New");
         dto.setLastName("User");
-        
         var request = post("/api/users").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(dto));
-        
         mockMvc.perform(request).andExpect(status().isCreated());
-        
         var user = userRepository.findByEmail("new@example.com").orElseThrow();
         assertThat(user.getFirstName()).isEqualTo("New");
         assertThat(passwordEncoder.matches("password", user.getPassword())).isTrue();
     }
-    
     @Test
     void testUpdateUser() throws Exception {
         var payload = """
@@ -99,23 +92,18 @@ public class UserControllerTest {
                     "lastName": "Name"
                 }
                 """;
-        
-        var request = put("/api/users/{id}", testUser.getId()).with(jwt()).contentType(MediaType.APPLICATION_JSON).content(payload);
-        
+        var request = put("/api/users/{id}", testUser.getId())
+                .with(jwt()).contentType(MediaType.APPLICATION_JSON).content(payload);
         mockMvc.perform(request).andExpect(status().isOk());
-        
         var updatedUser = userRepository.findById(testUser.getId()).orElseThrow();
         assertThat(updatedUser.getFirstName()).isEqualTo("Updated");
         assertThat(updatedUser.getLastName()).isEqualTo("Name");
     }
-    
     @Test
     void testDeleteUser() throws Exception {
         mockMvc.perform(delete("/api/users/{id}", testUser.getId()).with(jwt())).andExpect(status().isNoContent());
-        
         assertThat(userRepository.existsById(testUser.getId())).isFalse();
     }
-    
     @Test
     void testGetUserNotFound() throws Exception {
         mockMvc.perform(get("/api/users/{id}", 9999).with(jwt())).andExpect(status().isNotFound());

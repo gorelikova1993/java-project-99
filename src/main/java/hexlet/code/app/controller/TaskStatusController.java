@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,19 +24,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskStatusController {
     private final TaskStatusRepository repository;
-    
     @GetMapping
     public List<TaskStatus> getAll() {
         return repository.findAll();
     }
-    
     @GetMapping("/{id}")
     public ResponseEntity<TaskStatus> get(@PathVariable Long id) {
         return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TaskStatus> create(@Valid @RequestBody TaskStatusCreateDTO dto) {
@@ -48,17 +43,19 @@ public class TaskStatusController {
         status.setCreatedAt(LocalDateTime.now());
         return ResponseEntity.ok(repository.save(status));
     }
-    
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TaskStatus> update(@PathVariable Long id, @RequestBody TaskStatusUpdateDto dto) {
         return repository.findById(id).map(status -> {
-            if (dto.getName() != null) status.setName(dto.getName());
-            if (dto.getSlug() != null) status.setSlug(dto.getSlug());
+            if (dto.getName() != null) {
+                status.setName(dto.getName());
+            }
+            if (dto.getSlug() != null) {
+                status.setSlug(dto.getSlug());
+            }
             return ResponseEntity.ok(repository.save(status));
         }).orElse(ResponseEntity.notFound().build());
     }
-    
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> delete(@PathVariable Long id) {

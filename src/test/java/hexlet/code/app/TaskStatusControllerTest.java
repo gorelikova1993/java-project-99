@@ -39,10 +39,10 @@ public class TaskStatusControllerTest {
     @Autowired
     private TaskStatusRepository taskStatusRepository;
     private TaskStatus taskStatus;
-    
     @BeforeEach
     public void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+                .defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
         taskStatusRepository.deleteAll();
         //create test status
         taskStatus = new TaskStatus();
@@ -50,32 +50,32 @@ public class TaskStatusControllerTest {
         taskStatus.setSlug("to_review");
         taskStatus = taskStatusRepository.save(taskStatus);
     }
-    
     @Test
     void testGetAllTaskStatus() throws Exception {
-        var result = mockMvc.perform(get("/api/task_statuses").with(jwt())).andExpect(status().isOk()).andReturn();
+        var result = mockMvc.perform(get("/api/task_statuses")
+                .with(jwt())).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
         assertThatJson(body).isArray();
     }
-    
     @Test
     void testGetTaskStatusById() throws Exception {
-        var result = mockMvc.perform(get("/api/task_statuses/{id}", taskStatus.getId()).with(jwt())).andExpect(status().isOk()).andReturn();
+        var result = mockMvc.perform(get("/api/task_statuses/{id}",
+                taskStatus.getId()).with(jwt())).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
-        assertThatJson(body).and(json -> json.node("name").isEqualTo(taskStatus.getName()), json -> json.node("slug").isEqualTo(taskStatus.getSlug()));
+        assertThatJson(body).and(json -> json.node("name").isEqualTo(taskStatus.getName()),
+                json -> json.node("slug").isEqualTo(taskStatus.getSlug()));
     }
-    
     @Test
     void testCreateTaskStatus() throws Exception {
         var dto = new TaskStatusCreateDTO();
         dto.setName("New");
         dto.setSlug("new");
-        var request = post("/api/task_statuses").contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(dto));
+        var request = post("/api/task_statuses").contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(dto));
         mockMvc.perform(request).andExpect(status().isOk());
-        var taskStatus = taskStatusRepository.findBySlug("new").orElseThrow();
-        assertThat(taskStatus.getName()).isEqualTo("New");
+        TaskStatus newTaskStatus = taskStatusRepository.findBySlug("new").orElseThrow();
+        assertThat(newTaskStatus.getName()).isEqualTo("New");
     }
-    
     @Test
     void testUpdateTaskStatus() throws Exception {
         var payload = """
@@ -83,21 +83,21 @@ public class TaskStatusControllerTest {
                     "name": "newStatus"
                 }
                 """;
-        var request = put("/api/task_statuses/{id}", taskStatus.getId()).with(jwt()).contentType(MediaType.APPLICATION_JSON).content(payload);
+        var request = put("/api/task_statuses/{id}",
+                taskStatus.getId()).with(jwt()).contentType(MediaType.APPLICATION_JSON).content(payload);
         mockMvc.perform(request).andExpect(status().isOk());
         var updatedTask = taskStatusRepository.findBySlug(taskStatus.getSlug()).orElseThrow();
         assertThat(updatedTask.getName()).isEqualTo("newStatus");
     }
-    
     @Test
     void testDeleteTaskStatus() throws Exception {
-        mockMvc.perform(delete("/api/task_statuses/{id}", taskStatus.getId()).with(jwt())).andExpect(status().isNoContent());
-        
+        mockMvc.perform(delete("/api/task_statuses/{id}",
+                taskStatus.getId()).with(jwt())).andExpect(status().isNoContent());
         assertThat(taskStatusRepository.existsById(taskStatus.getId())).isFalse();
     }
-    
     @Test
     void testGetTaskNotFound() throws Exception {
-        mockMvc.perform(get("/api/task_statuses/{id}", 9999).with(jwt())).andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/task_statuses/{id}", 9999)
+                .with(jwt())).andExpect(status().isNotFound());
     }
 }

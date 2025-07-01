@@ -8,5 +8,4 @@ import lombok.Setter;
 public class TaskStatusCreateDTO {
     private String name;
     private String slug;
-    
 }

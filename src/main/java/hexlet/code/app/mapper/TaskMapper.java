@@ -20,62 +20,49 @@ import java.util.stream.Collectors;
 public class TaskMapper {
     @Autowired
     private UserRepository userRepository;
-    
     @Autowired
     private LabelRepository labelRepository;
-    
     @Autowired
     private TaskStatusRepository taskStatusRepository;
-    
     @Autowired
     private LabelMapper labelMapper;
-    
     public Task toEntity(TaskCreateDTO taskCreateDTO) {
         Task task = new Task();
         task.setIndex(taskCreateDTO.getIndex());
         task.setName(taskCreateDTO.getTitle());
         task.setDescription(taskCreateDTO.getContent());
-        
         // Получаем пользователя по assignee_id
-        User assignee = userRepository.findById((long) taskCreateDTO.getAssignee_id())
+        User assignee = userRepository.findById((long) taskCreateDTO.getAssigneeId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
-        
         // Получаем статус задачи по названию status
         TaskStatus status = taskStatusRepository.findByName(taskCreateDTO.getStatus())
                 .orElseThrow(() -> new RuntimeException("Task status not found"));
-        
         task.setAssignee(assignee);
         task.setTaskStatus(status);
         task.setCreatedAt(LocalDate.now()); // Устанавливаем текущую дату как дату создания
-        
         if (taskCreateDTO.getLabelIds() != null) {
             Set<Label> labels = labelRepository.findAllById(taskCreateDTO.getLabelIds())
                     .stream().collect(Collectors.toSet());
             task.setLabels(labels);
         }
-        
         return task;
     }
-    
     public Task toEntity(TaskUpdateDTO taskUpdateDTO, Task task) {
         task.setDescription(taskUpdateDTO.getContent());
         task.setName(taskUpdateDTO.getTitle());
         return task;
     }
-    
     // Метод для преобразования Task в TaskCreateDTO
     public TaskCreateDTO toDto(Task task) {
         TaskCreateDTO taskCreateDTO = new TaskCreateDTO();
         taskCreateDTO.setIndex(task.getIndex());
         taskCreateDTO.setTitle(task.getName());
         taskCreateDTO.setContent(task.getDescription());
-        taskCreateDTO.setAssignee_id(task.getAssignee().getId()); // Преобразуем ID пользователя в int
+        taskCreateDTO.setAssigneeId(task.getAssignee().getId()); // Преобразуем ID пользователя в int
         taskCreateDTO.setStatus(task.getTaskStatus().getName()); // Получаем название статуса
         taskCreateDTO.setLabelIds(task.getLabels().stream()
                 .map(Label::getId)
                 .collect(Collectors.toSet()));
-        
         return taskCreateDTO;
     }
-    
 }
