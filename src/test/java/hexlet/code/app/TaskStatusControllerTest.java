@@ -73,8 +73,8 @@ public class TaskStatusControllerTest {
         var request = post("/api/task_statuses").contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(dto));
         mockMvc.perform(request).andExpect(status().isOk());
-        TaskStatus newTaskStatus = taskStatusRepository.findBySlug("new").orElseThrow();
-        assertThat(newTaskStatus.getName()).isEqualTo("New");
+        TaskStatus aNew = taskStatusRepository.findBySlug("new").orElseThrow();
+        assertThat(aNew.getName()).isEqualTo("New");
     }
     @Test
     void testUpdateTaskStatus() throws Exception {
