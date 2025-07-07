@@ -21,6 +21,9 @@ jobs:
         with:
           gradle-version: 8.9
           arguments: build
+      - name: Debug secret
+        run: echo "Secret is set"
+        if: ${{ secrets.CC_TEST_REPORTER_ID != '' }}
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v5.0.0
         env:
