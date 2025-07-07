@@ -23,7 +23,9 @@ jobs:
           arguments: build
       - name: Debug secret
         run: echo "Secret is set"
-        if: ${{ secrets.CC_TEST_REPORTER_ID != '' }}
+        env:
+          SECRET: ${{ secrets.CC_TEST_REPORTER_ID }}
+        if: env.SECRET != ''
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v5.0.0
         env:
