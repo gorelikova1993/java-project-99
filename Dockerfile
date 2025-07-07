@@ -4,8 +4,8 @@ WORKDIR /app
 
 COPY gradlew .
 COPY gradle gradle
-COPY build.gradle .
-COPY settings.gradle .
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
 
 COPY src src
 
@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-RUN ./gradlew build -x test --no-daemon
+RUN ./gradlew clean build -x test --no-daemon
 
-COPY build/libs/java-project-99-0.0.1-SNAPSHOT.jar app.jar
+COPY build/libs/app-0.0.1-SNAPSHOT.jar app.jar
 
 CMD ["java", "-Xmx256m", "-Xms128m", "-jar", "app.jar", "--spring.profiles.active=prod"]
