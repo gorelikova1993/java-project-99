@@ -35,7 +35,7 @@ dependencies {
 	implementation("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
-	implementation("io.sentry:sentry-spring-boot-starter:7.6.0")
+	implementation("io.sentry:sentry-spring-boot-starter:7.12.0")
 	implementation("org.mapstruct:mapstruct:1.5.5.Final")
 	annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 	implementation("org.springframework.boot:spring-boot-starter-security")
