@@ -1,17 +1,26 @@
-FROM eclipse-temurin:21-jre
+# Стадия 1: Сборка приложения
+   FROM eclipse-temurin:21-jdk AS builder
 
-WORKDIR /app
+   # Устанавливаем рабочую директорию
+   WORKDIR /app
 
-COPY . .
+   # Копируем все необходимые файлы
+   COPY . .
 
-RUN chmod +x gradlew
+   # Делаем gradlew исполняемым
+   RUN chmod +x gradlew
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+   # Собираем приложение без тестов и Gradle Daemon
+   RUN ./gradlew clean build -x test --no-daemon && ls -l build/libs
 
-RUN ./gradlew clean build -x test --no-daemon && ls -l build/libs
+   # Стадия 2: Запуск приложения
+   FROM eclipse-temurin:21-jre
 
-COPY build/libs/app-0.0.1-SNAPSHOT.jar app.jar
+   # Устанавливаем рабочую директорию
+   WORKDIR /app
 
-CMD ["java", "-Xmx256m", "-Xms128m", "-jar", "app.jar", "--spring.profiles.active=prod"]
+   # Копируем JAR-файл из стадии сборки
+   COPY --from=builder /app/build/libs/app-0.0.1-SNAPSHOT.jar app.jar
+
+   # Указываем команду для запуска приложения
+   CMD ["java", "-Xmx256m", "-Xms128m", "-jar", "app.jar", "--spring.profiles.active=prod"]
