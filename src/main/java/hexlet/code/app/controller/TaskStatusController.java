@@ -6,8 +6,8 @@ import hexlet.code.app.model.TaskStatus;
 import hexlet.code.app.repository.TaskStatusRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,16 +35,17 @@ public class TaskStatusController {
                 .orElse(ResponseEntity.notFound().build());
     }
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TaskStatus> create(@Valid @RequestBody TaskStatusCreateDTO dto) {
+        if (repository.findBySlug(dto.getSlug()).isPresent()) {
+            throw new IllegalArgumentException("Slug already exists");
+        }
         TaskStatus status = new TaskStatus();
         status.setName(dto.getName());
         status.setSlug(dto.getSlug());
         status.setCreatedAt(LocalDateTime.now());
-        return ResponseEntity.ok(repository.save(status));
+        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(status));
     }
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TaskStatus> update(@PathVariable Long id, @RequestBody TaskStatusUpdateDto dto) {
         return repository.findById(id).map(status -> {
             if (dto.getName() != null) {
@@ -57,7 +58,6 @@ public class TaskStatusController {
         }).orElse(ResponseEntity.notFound().build());
     }
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();

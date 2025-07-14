@@ -1,7 +1,6 @@
 package hexlet.code.app.config;
 import hexlet.code.app.util.JwtUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -14,13 +13,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
+@Slf4j
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     public JwtFilter(JwtUtils jwtUtils) {
         this.jwtUtils = jwtUtils;
     }
-    private final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -30,14 +29,14 @@ public class JwtFilter extends OncePerRequestFilter {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
-            logger.info("Token received: {}", token);
+            log.info("Token received: {}", token);
             try {
                 String email = jwtUtils.extractEmail(token);
-                logger.info("Extracted email: {}", email);
+                log.info("Extracted email: {}", email);
                 var authentication = new UsernamePasswordAuthenticationToken(email, null, new ArrayList<>());
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception e) {
-                logger.error("JWT authentication failed: {}", e.getMessage());
+                log.error("JWT authentication failed: {}", e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT");
                 return;
             }

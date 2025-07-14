@@ -45,3 +45,5 @@ bin/
 /app/.idea/
 /app/jte-classes/
 /jte-classes/
+/node_modules/
+/.gradle/

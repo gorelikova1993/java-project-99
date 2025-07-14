@@ -11,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,13 +50,11 @@ public class TaskController {
                 .orElse(ResponseEntity.notFound().build());
     }
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Task> create(@Valid @RequestBody TaskCreateDTO taskCreateDTO) {
         Task task = taskMapper.toEntity(taskCreateDTO);
         return ResponseEntity.ok(taskRepository.save(task));
     }
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Task> update(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO taskUpdateDTO) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + id));
@@ -65,11 +62,7 @@ public class TaskController {
         return ResponseEntity.ok(taskRepository.save(task));
     }
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        if (!taskRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Task not found with id " + id); // Проверка существования задачи
-        }
         taskRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }

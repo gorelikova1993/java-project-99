@@ -2,13 +2,17 @@ package hexlet.code.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.app.dto.TaskStatusCreateDTO;
+import hexlet.code.app.dto.TaskStatusUpdateDto;
 import hexlet.code.app.model.TaskStatus;
+import hexlet.code.app.model.User;
 import hexlet.code.app.repository.TaskStatusRepository;
+import hexlet.code.app.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -38,6 +42,11 @@ public class TaskStatusControllerTest {
     private ObjectMapper om;
     @Autowired
     private TaskStatusRepository taskStatusRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    private User testUser;
     private TaskStatus taskStatus;
     @BeforeEach
     public void setUp() {
@@ -48,6 +57,13 @@ public class TaskStatusControllerTest {
         taskStatus = new TaskStatus();
         taskStatus.setName("ToReview");
         taskStatus.setSlug("to_review");
+        // Создание пользователя
+        testUser = new User();
+        testUser.setFirstName("John");
+        testUser.setLastName("Smith");
+        testUser.setEmail("john@example.com");
+        testUser.setPassword(passwordEncoder.encode("password"));
+        testUser = userRepository.save(testUser);
         taskStatus = taskStatusRepository.save(taskStatus);
     }
     @Test
@@ -67,26 +83,40 @@ public class TaskStatusControllerTest {
     }
     @Test
     void testCreateTaskStatus() throws Exception {
-        var dto = new TaskStatusCreateDTO();
+        TaskStatusCreateDTO dto = new TaskStatusCreateDTO();
         dto.setName("New");
         dto.setSlug("new");
-        var request = post("/api/task_statuses").contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(dto));
-        mockMvc.perform(request).andExpect(status().isOk());
-        TaskStatus aNew = taskStatusRepository.findBySlug("new").orElseThrow();
-        assertThat(aNew.getName()).isEqualTo("New");
+        // Выполнение POST-запроса
+        var response = mockMvc.perform(post("/api/task_statuses")
+                        .with(jwt().jwt(jwt -> jwt.claim("sub", testUser.getEmail())))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(om.writeValueAsString(dto)))
+                .andExpect(status().isCreated()) // Изменено на 201
+                .andReturn();
+        String body = response.getResponse().getContentAsString();
+        System.out.println("Response: " + body);
+        TaskStatus actualStatus = om.readValue(body, TaskStatus.class);
+        TaskStatus expectedStatus = taskStatusRepository.findBySlug("new")
+                .orElseThrow(() -> new AssertionError("TaskStatus not found in database"));
+        assertThat(actualStatus.getId()).isEqualTo(expectedStatus.getId());
+        assertThat(actualStatus.getName()).isEqualTo(expectedStatus.getName());
+        assertThat(actualStatus.getSlug()).isEqualTo(expectedStatus.getSlug());
+        assertThat(actualStatus.getCreatedAt()).isEqualTo(expectedStatus.getCreatedAt());
     }
     @Test
     void testUpdateTaskStatus() throws Exception {
-        var payload = """
-                {
-                    "name": "newStatus"
-                }
-                """;
-        var request = put("/api/task_statuses/{id}",
-                taskStatus.getId()).with(jwt()).contentType(MediaType.APPLICATION_JSON).content(payload);
-        mockMvc.perform(request).andExpect(status().isOk());
-        var updatedTask = taskStatusRepository.findBySlug(taskStatus.getSlug()).orElseThrow();
+        TaskStatusUpdateDto dto = new TaskStatusUpdateDto();
+        dto.setName("newStatus");
+        dto.setSlug("newStatus");
+
+        var response = mockMvc.perform(put("/api/task_statuses/{id}", taskStatus.getId())
+                        .with(jwt().jwt(jwt -> jwt.claim("sub", taskStatus.getId())))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(dto)))
+                .andExpect(status().isOk()).andReturn();
+        String body = response.getResponse().getContentAsString();
+        System.out.println("Response: " + body);
+        var updatedTask = taskStatusRepository.findBySlug("newStatus").orElseThrow();
         assertThat(updatedTask.getName()).isEqualTo("newStatus");
     }
     @Test

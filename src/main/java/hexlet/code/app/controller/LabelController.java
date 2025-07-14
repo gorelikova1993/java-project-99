@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +26,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/labels")
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
 public class LabelController {
     private final LabelRepository labelRepository;
     private final LabelMapper labelMapper;
@@ -44,7 +42,6 @@ public class LabelController {
                 .toList();
     }
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelDTO> create(@Valid @RequestBody LabelCreateDTO dto) {
         if (labelRepository.existsByName(dto.getName())) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Label already exists");
@@ -56,7 +53,6 @@ public class LabelController {
         return new ResponseEntity<>(labelMapper.toDto(label), HttpStatus.CREATED);
     }
     @PutMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<LabelDTO> update(@PathVariable Long id, @Valid @RequestBody LabelUpdateDTO dto) {
         var label = labelRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Label not found"));
@@ -68,14 +64,9 @@ public class LabelController {
         return ResponseEntity.ok(labelMapper.toDto(label));
     }
     @DeleteMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         var label = labelRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Label not found"));
-        if (!label.getTasks().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Label is used in tasks and cannot be deleted");
-        }
         labelRepository.delete(label);
         return ResponseEntity.noContent().build();
     }
