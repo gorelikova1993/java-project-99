@@ -58,7 +58,7 @@ public class TaskController {
     public ResponseEntity<Task> update(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO taskUpdateDTO) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + id));
-        task = taskMapper.toEntity(taskUpdateDTO, task);
+        taskMapper.updateEntity(taskUpdateDTO, task);
         return ResponseEntity.ok(taskRepository.save(task));
     }
     @DeleteMapping("/{id}")

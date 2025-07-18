@@ -11,6 +11,7 @@ import lombok.Setter;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import java.time.LocalDateTime;
 
@@ -33,5 +34,6 @@ public class User {
     @CreatedDate
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
+    @LastModifiedDate
     private LocalDateTime updatedAt;
 }

@@ -1,6 +1,8 @@
 package hexlet.code.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import hexlet.code.app.dto.TaskCreateDTO;
+import hexlet.code.app.dto.TaskUpdateDTO;
 import hexlet.code.app.model.Task;
 import hexlet.code.app.model.TaskStatus;
 import hexlet.code.app.model.User;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -96,20 +99,19 @@ public class TaskControllerTest {
     void testCreateTask() throws Exception {
         Long id = testUser.getId();
         // Данные для новой задачи
-        String payload = String.format("""
-                {
-                   "index": 12,
-                   "assignee_id": %d,
-                   "title": "Test title",
-                   "content": "Test content",
-                   "status": "ToReview"
-                }
-                """, id);
+        TaskCreateDTO testTask = new TaskCreateDTO();
+        testTask.setIndex(12);
+        testTask.setAssigneeId(testUser.getId());
+        testTask.setTitle("Test title");
+        testTask.setContent("Test content");
+        testTask.setStatus("ToReview");
         // Отправляем запрос на создание задачи
         var result = mockMvc.perform(post("/api/tasks")
                 .with(jwt().jwt(jwt ->
-                        jwt.claim("sub", testUser.getEmail()))).contentType("application/json")
-                .content(payload)).andExpect(status().isOk()).andReturn();
+                        jwt.claim("sub", testUser.getEmail())))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(testTask)))
+                .andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
         // Проверяем, что возвращаемая задача соответствует ожидаемой
         assertThatJson(body).node("name").isEqualTo("Test title");
@@ -117,16 +119,15 @@ public class TaskControllerTest {
     }
     @Test
     void testUpdateTask() throws Exception {
-        var payload = """
-                {
-                    "title": "Updated Task Name",
-                    "content": "Updated Description"
-                }
-                """;
+        TaskUpdateDTO updatedTask = new TaskUpdateDTO();
+        updatedTask.setTitle("Updated Task Name");
+        updatedTask.setContent("Updated Description");
+
         var result = mockMvc.perform(put("/api/tasks/{id}",
                 task.getId()).with(jwt()
-                .jwt(jwt -> jwt.claim("sub", testUser.getEmail()))).contentType("application/json")
-                .content(payload)).andExpect(status().isOk()).andReturn();
+                .jwt(jwt -> jwt.claim("sub", testUser.getEmail())))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(om.writeValueAsString(updatedTask))).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
         // Проверяем, что имя задачи обновлено
         assertThatJson(body).node("name").isEqualTo("Updated Task Name");

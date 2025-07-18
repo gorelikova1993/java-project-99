@@ -2,6 +2,7 @@ package hexlet.code.app;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.app.dto.UserCreateDto;
+import hexlet.code.app.dto.UserUpdateDto;
 import hexlet.code.app.model.User;
 import hexlet.code.app.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +17,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -45,8 +48,9 @@ public class UserControllerTest {
     private User testUser;
     @BeforeEach
     public void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).
-                defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
+        mockMvc = MockMvcBuilders.webAppContextSetup(wac)
+                .apply(springSecurity())
+                .defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
         userRepository.deleteAll(); // очистка БД
         // Сохраняем тестового пользователя
         testUser = new User();
@@ -86,14 +90,11 @@ public class UserControllerTest {
     }
     @Test
     void testUpdateUser() throws Exception {
-        var payload = """
-                {
-                    "firstName": "Updated",
-                    "lastName": "Name"
-                }
-                """;
+        UserUpdateDto updatedDTOUser = new UserUpdateDto();
+        updatedDTOUser.setFirstName("Updated");
+        updatedDTOUser.setLastName("Name");
         var request = put("/api/users/{id}", testUser.getId())
-                .with(jwt()).contentType(MediaType.APPLICATION_JSON).content(payload);
+                .with(jwt()).contentType(MediaType.APPLICATION_JSON).content(om.writeValueAsString(updatedDTOUser));
         mockMvc.perform(request).andExpect(status().isOk());
         var updatedUser = userRepository.findById(testUser.getId()).orElseThrow();
         assertThat(updatedUser.getFirstName()).isEqualTo("Updated");
@@ -101,7 +102,9 @@ public class UserControllerTest {
     }
     @Test
     void testDeleteUser() throws Exception {
-        mockMvc.perform(delete("/api/users/{id}", testUser.getId()).with(jwt())).andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/users/{id}", testUser.getId())
+                        .with(user("jane@example.com")))
+                .andExpect(status().isNoContent());
         assertThat(userRepository.existsById(testUser.getId())).isFalse();
     }
     @Test

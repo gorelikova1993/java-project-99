@@ -6,9 +6,12 @@ import hexlet.code.app.dto.UserUpdateDto;
 import hexlet.code.app.exception.ResourceNotFoundException;
 import hexlet.code.app.mapper.UserMapper;
 import hexlet.code.app.repository.UserRepository;
+import hexlet.code.app.util.UserUtils;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +31,8 @@ public class UserController {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserUtils userUtils;
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
         return userRepository.findById(id)
@@ -55,6 +60,7 @@ public class UserController {
         return ResponseEntity.ok(userDTO);
     }
     // Удалить пользователя
+    @PreAuthorize("@userUtils.isAuthor(#id)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         if (!userRepository.existsById(id)) {

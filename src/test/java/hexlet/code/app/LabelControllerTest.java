@@ -109,7 +109,6 @@ public class LabelControllerTest {
     void testUpdate() throws Exception {
         Label payload = new Label();
         payload.setName("enhancement");
-        payload.setCreatedAt(LocalDate.now());
         var response = mockMvc.perform(put("/api/labels/" + label.getId())
                         .with(jwt().jwt(jwt -> jwt.claim("sub", testUser.getEmail())))
                         .contentType(MediaType.APPLICATION_JSON)

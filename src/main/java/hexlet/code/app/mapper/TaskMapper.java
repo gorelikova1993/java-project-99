@@ -9,60 +9,62 @@ import hexlet.code.app.model.User;
 import hexlet.code.app.repository.LabelRepository;
 import hexlet.code.app.repository.TaskStatusRepository;
 import hexlet.code.app.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.springframework.beans.factory.annotation.Autowired;
+
+
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Component
-public class TaskMapper {
+@Mapper(componentModel = "spring")
+public abstract class TaskMapper {
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private LabelRepository labelRepository;
     @Autowired
     private TaskStatusRepository taskStatusRepository;
-    @Autowired
-    private LabelMapper labelMapper;
-    public Task toEntity(TaskCreateDTO taskCreateDTO) {
-        Task task = new Task();
-        task.setIndex(taskCreateDTO.getIndex());
-        task.setName(taskCreateDTO.getTitle());
-        task.setDescription(taskCreateDTO.getContent());
-        // Получаем пользователя по assignee_id
-        User assignee = userRepository.findById((long) taskCreateDTO.getAssigneeId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        // Получаем статус задачи по названию status
-        TaskStatus status = taskStatusRepository.findByName(taskCreateDTO.getStatus())
-                .orElseThrow(() -> new RuntimeException("Task status not found"));
-        task.setAssignee(assignee);
-        task.setTaskStatus(status);
-        task.setCreatedAt(LocalDate.now()); // Устанавливаем текущую дату как дату создания
-        if (taskCreateDTO.getLabelIds() != null) {
-            Set<Label> labels = labelRepository.findAllById(taskCreateDTO.getLabelIds())
-                    .stream().collect(Collectors.toSet());
-            task.setLabels(labels);
+    @Mapping(target = "name", source = "title")
+    @Mapping(target = "description", source = "content")
+    @Mapping(target = "assignee", expression = "java(getAssignee(taskCreateDTO.getAssigneeId()))")
+    @Mapping(target = "taskStatus", expression = "java(getTaskStatus(taskCreateDTO.getStatus()))")
+    @Mapping(target = "labels", expression = "java(getLabels(taskCreateDTO.getLabelIds()))")
+    @Mapping(target = "createdAt", expression = "java(java.time.LocalDate.now())")
+    public abstract Task toEntity(TaskCreateDTO taskCreateDTO);
+    @Mapping(target = "name", source = "title")
+    @Mapping(target = "description", source = "content")
+    public abstract void updateEntity(TaskUpdateDTO dto, @MappingTarget Task task);
+    @Mapping(target = "title", source = "name")
+    @Mapping(target = "content", source = "description")
+    @Mapping(target = "status", source = "taskStatus.name")
+    @Mapping(target = "assigneeId", source = "assignee.id")
+    @Mapping(target = "labelIds", expression = "java(getLabelIds(task))")
+    public abstract TaskCreateDTO toDto(Task task);
+    // ======== Вспомогательные методы ниже ==========
+    protected User getAssignee(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found: " + id));
+    }
+    protected TaskStatus getTaskStatus(String statusName) {
+        return taskStatusRepository.findByName(statusName)
+                .orElseThrow(() -> new RuntimeException("Task status not found: " + statusName));
+    }
+    protected Set<Label> getLabels(Set<Long> labelIds) {
+        if (labelIds == null) {
+            return new HashSet<>();
         }
-        return task;
+        return new HashSet<>(labelRepository.findAllById(labelIds));
     }
-    public Task toEntity(TaskUpdateDTO taskUpdateDTO, Task task) {
-        task.setDescription(taskUpdateDTO.getContent());
-        task.setName(taskUpdateDTO.getTitle());
-        return task;
-    }
-    // Метод для преобразования Task в TaskCreateDTO
-    public TaskCreateDTO toDto(Task task) {
-        TaskCreateDTO taskCreateDTO = new TaskCreateDTO();
-        taskCreateDTO.setIndex(task.getIndex());
-        taskCreateDTO.setTitle(task.getName());
-        taskCreateDTO.setContent(task.getDescription());
-        taskCreateDTO.setAssigneeId(task.getAssignee().getId()); // Преобразуем ID пользователя в int
-        taskCreateDTO.setStatus(task.getTaskStatus().getName()); // Получаем название статуса
-        taskCreateDTO.setLabelIds(task.getLabels().stream()
+    protected Set<Long> getLabelIds(Task task) {
+        if (task.getLabels() == null) {
+            return new HashSet<>();
+        }
+        return task.getLabels().stream()
                 .map(Label::getId)
-                .collect(Collectors.toSet()));
-        return taskCreateDTO;
+                .collect(Collectors.toSet());
     }
 }

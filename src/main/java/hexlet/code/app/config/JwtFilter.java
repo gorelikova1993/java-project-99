@@ -27,6 +27,7 @@ public class JwtFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
+        log.info("Authorization header: {}", authHeader);
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             log.info("Token received: {}", token);
@@ -40,6 +41,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid JWT");
                 return;
             }
+        } else {
+            log.warn("No Authorization header or invalid format");
         }
         filterChain.doFilter(request, response);
     }

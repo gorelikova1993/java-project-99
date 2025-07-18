@@ -23,4 +23,4 @@
    COPY --from=builder /app/build/libs/app-0.0.1-SNAPSHOT.jar app.jar
 
    # Указываем команду для запуска приложения
-   CMD ["java", "-Xmx256m", "-Xms128m", "-jar", "app.jar", "--spring.profiles.active=prod"]
+   CMD ["java", "-Xmx256m", "-Xms128m", "-jar", "app.jar"]

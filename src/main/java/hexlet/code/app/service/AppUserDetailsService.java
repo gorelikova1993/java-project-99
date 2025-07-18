@@ -2,6 +2,7 @@ package hexlet.code.app.service;
 
 import hexlet.code.app.model.User;
 import hexlet.code.app.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class AppUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
@@ -21,7 +23,7 @@ public class AppUserDetailsService implements UserDetailsService {
     }
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        LOGGER.info("Looking for user with email: {}", email);
+        log.info("Looking for user with email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("user not found"));
         return org.springframework.security.core.userdetails.User
