@@ -3,8 +3,6 @@ package hexlet.code.app.service;
 import hexlet.code.app.model.User;
 import hexlet.code.app.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 public class AppUserDetailsService implements UserDetailsService {
     private UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    public static final Logger LOGGER = LoggerFactory.getLogger(AppUserDetailsService.class);
     public AppUserDetailsService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;

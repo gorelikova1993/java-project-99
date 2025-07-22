@@ -3,8 +3,6 @@ package hexlet.code.app.initializer;
 import hexlet.code.app.model.User;
 import hexlet.code.app.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,7 +15,6 @@ public class DataInitializer implements CommandLineRunner {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    private final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
     @Override
     public void run(String... args) throws Exception {
         String adminEmail = "hexlet@example.com";
@@ -28,7 +25,7 @@ public class DataInitializer implements CommandLineRunner {
             admin.setPassword(passwordEncoder.encode(adminPassword));
             userRepository.save(admin);
         } else {
-            logger.info("The user is already exist: {}", adminEmail);
+            log.info("The user is already exist: {}", adminEmail);
         }
     }
 }

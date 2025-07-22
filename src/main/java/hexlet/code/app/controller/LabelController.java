@@ -43,9 +43,6 @@ public class LabelController {
     }
     @PostMapping
     public ResponseEntity<LabelDTO> create(@Valid @RequestBody LabelCreateDTO dto) {
-        if (labelRepository.existsByName(dto.getName())) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Label already exists");
-        }
         Label label = new Label();
         label.setName(dto.getName());
         label.setCreatedAt(LocalDate.now());

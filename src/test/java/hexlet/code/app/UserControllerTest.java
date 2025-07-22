@@ -1,5 +1,6 @@
 package hexlet.code.app;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.app.dto.UserCreateDto;
 import hexlet.code.app.dto.UserUpdateDto;
@@ -31,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -62,10 +64,14 @@ public class UserControllerTest {
     }
     @Test
     void testGetAllUsers() throws Exception {
+        List<User> usersInDB = userRepository.findAll();
         var result = mockMvc.perform(get("/api/users")
                 .with(jwt())).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
-        assertThatJson(body).isArray();
+        String json = result.getResponse().getContentAsString();
+        List<User> usersFromController = om.readValue(json, new TypeReference<List<User>>() {
+        });
+        assertThat(usersFromController).containsExactlyElementsOf(usersInDB);
     }
     @Test
     void testGetUserById() throws Exception {

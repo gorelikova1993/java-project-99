@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -42,7 +41,6 @@ public class TaskStatusController {
         TaskStatus status = new TaskStatus();
         status.setName(dto.getName());
         status.setSlug(dto.getSlug());
-        status.setCreatedAt(LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(status));
     }
     @PutMapping("/{id}")

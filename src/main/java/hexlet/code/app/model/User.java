@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.Email;
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
 @Getter
 @Entity(name = "users")
 @Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,6 +28,7 @@ public class User {
     private String lastName;
     @NotBlank
     @Email(message = "Email should be valid")
+    @EqualsAndHashCode.Include
     private String email;
     @NotBlank(message = "Password is required")
     @Size(min = 3, message = "Password must be at least 3 characters long")
