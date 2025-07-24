@@ -3,6 +3,7 @@ package hexlet.code.app.controller;
 import hexlet.code.app.dto.LoginRequestDto;
 import hexlet.code.app.util.JwtUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication;
 @RestController
 @RequestMapping("/api")
 @AllArgsConstructor
+@Slf4j
 public class AuthController {
     private  AuthenticationManager authenticationManager;
     private  JwtUtils jwtUtils;

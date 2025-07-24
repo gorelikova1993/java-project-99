@@ -77,9 +77,10 @@ public class LabelControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
         var body = response.getResponse().getContentAsString();
-        List<LabelDTO> labelDTOS = om.readValue(body, new TypeReference<>() { });
-        var actual = labelDTOS.stream().map(labelMapper::fromDto).toList();
-        var expected = labelRepository.findAll();
+        List<LabelDTO> actual = om.readValue(body, new TypeReference<>() { });
+        var expected = labelRepository.findAll().stream()
+                .map(labelMapper::toDto)
+                .toList();
         Assertions.assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
     }
     @Test

@@ -53,9 +53,6 @@ public class LabelController {
     public ResponseEntity<LabelDTO> update(@PathVariable Long id, @Valid @RequestBody LabelUpdateDTO dto) {
         var label = labelRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Label not found"));
-        if (!label.getName().equals(dto.getName()) && labelRepository.existsByName(dto.getName())) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Label with this name already exists");
-        }
         label.setName(dto.getName());
         labelRepository.save(label);
         return ResponseEntity.ok(labelMapper.toDto(label));

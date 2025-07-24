@@ -35,9 +35,6 @@ public class TaskStatusController {
     }
     @PostMapping
     public ResponseEntity<TaskStatus> create(@Valid @RequestBody TaskStatusCreateDTO dto) {
-        if (repository.findBySlug(dto.getSlug()).isPresent()) {
-            throw new IllegalArgumentException("Slug already exists");
-        }
         TaskStatus status = new TaskStatus();
         status.setName(dto.getName());
         status.setSlug(dto.getSlug());
