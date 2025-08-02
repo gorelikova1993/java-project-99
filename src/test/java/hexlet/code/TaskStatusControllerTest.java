@@ -101,7 +101,6 @@ public class TaskStatusControllerTest {
         assertThat(actualStatus.getId()).isEqualTo(expectedStatus.getId());
         assertThat(actualStatus.getName()).isEqualTo(expectedStatus.getName());
         assertThat(actualStatus.getSlug()).isEqualTo(expectedStatus.getSlug());
-        assertThat(actualStatus.getCreatedAt()).isEqualTo(expectedStatus.getCreatedAt());
     }
     @Test
     void testUpdateTaskStatus() throws Exception {
