@@ -24,8 +24,14 @@ import java.util.List;
 public class TaskStatusController {
     private final TaskStatusRepository repository;
     @GetMapping
-    public List<TaskStatus> getAll() {
-        return repository.findAll();
+    public ResponseEntity<List<TaskStatus>>  getAll() {
+        var statuses = repository.findAll();
+        
+        var headers = new org.springframework.http.HttpHeaders();
+        headers.add("X-Total-Count", String.valueOf(statuses.size()));
+        headers.add("Access-Control-Expose-Headers", "X-Total-Count");
+        
+        return ResponseEntity.ok().headers(headers).body(statuses);
     }
     @GetMapping("/{id}")
     public ResponseEntity<TaskStatus> get(@PathVariable Long id) {

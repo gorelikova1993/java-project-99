@@ -26,3 +26,7 @@ jobs:
         with:
           token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
           files: build/reports/jacoco/test/jacocoTestReport.xml
+      - name: Upload to Coveralls
+        run: ./gradlew jacocoTestReport coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}

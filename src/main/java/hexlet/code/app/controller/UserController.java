@@ -39,8 +39,15 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
     @GetMapping
-    public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::toDto).toList();
+    public ResponseEntity<List<UserDto>> getAllUsers() {
+        
+        var users = userRepository.findAll().stream().map(userMapper::toDto).toList();
+        
+        var headers = new org.springframework.http.HttpHeaders();
+        headers.add("X-Total-Count", String.valueOf(users.size()));
+        headers.add("Access-Control-Expose-Headers", "X-Total-Count");
+        
+        return ResponseEntity.ok().headers(headers).body(users);
     }
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateDto dto) {

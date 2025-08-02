@@ -5,6 +5,8 @@ plugins {
 	application
 	id("org.springframework.boot") version "3.5.0"
 	id("io.spring.dependency-management") version "1.1.7"
+	id("jacoco")
+	id("com.github.kt3k.coveralls") version "2.12.2"
 	checkstyle
 	jacoco
 }
@@ -21,6 +23,7 @@ java {
 		languageVersion = JavaLanguageVersion.of(21)
 	}
 }
+
 
 repositories {
 	mavenCentral()

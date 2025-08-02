@@ -9,7 +9,6 @@ import hexlet.code.app.repository.TaskRepository;
 import hexlet.code.app.specification.TaskSpecification;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import static org.springframework.data.jpa.domain.Specification.allOf;
 
 import java.util.List;
@@ -31,29 +31,39 @@ public class TaskController {
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
     @GetMapping
-    public List<Task> getAll(@RequestParam(required = false) String titleCont,
-                             @RequestParam(required = false) Long assigneeId,
-                             @RequestParam(required = false) String status,
-                             @RequestParam(required = false) Long labelId) {
-        Specification<Task> spec = allOf(
+    public ResponseEntity<List<Task>> getAll(@RequestParam(required = false) String titleCont,
+                                             @RequestParam(required = false) Long assigneeId,
+                                             @RequestParam(required = false) String status,
+                                             @RequestParam(required = false) Long labelId) {
+        var spec = allOf(
                 TaskSpecification.hasTitleContaining(titleCont),
                 TaskSpecification.hasAssigneeId(assigneeId),
                 TaskSpecification.hasStatusSlug(status),
                 TaskSpecification.hasLabelId(labelId)
         );
-        return taskRepository.findAll(spec);
+        
+        var tasks = taskRepository.findAll(spec);
+        
+        var headers = new org.springframework.http.HttpHeaders();
+        headers.add("X-Total-Count", String.valueOf(tasks.size()));
+        headers.add("Access-Control-Expose-Headers", "X-Total-Count");
+        
+        return ResponseEntity.ok().headers(headers).body(tasks);
     }
+    
     @GetMapping("/{id}")
     public ResponseEntity<Task> get(@PathVariable Long id) {
         return taskRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    
     @PostMapping
     public ResponseEntity<Task> create(@Valid @RequestBody TaskCreateDTO taskCreateDTO) {
         Task task = taskMapper.toEntity(taskCreateDTO);
         return ResponseEntity.ok(taskRepository.save(task));
     }
+    
     @PutMapping("/{id}")
     public ResponseEntity<Task> update(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO taskUpdateDTO) {
         Task task = taskRepository.findById(id)
@@ -61,6 +71,7 @@ public class TaskController {
         taskMapper.updateEntity(taskUpdateDTO, task);
         return ResponseEntity.ok(taskRepository.save(task));
     }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         taskRepository.deleteById(id);

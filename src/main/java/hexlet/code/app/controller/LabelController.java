@@ -8,6 +8,7 @@ import hexlet.code.app.model.Label;
 import hexlet.code.app.repository.LabelRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,10 +37,15 @@ public class LabelController {
         return ResponseEntity.ok(labelMapper.toDto(label));
     }
     @GetMapping
-    public List<LabelDTO> getAll() {
-        return labelRepository.findAll().stream()
+    public ResponseEntity<List<LabelDTO>> getAll() {
+        List<LabelDTO> labels = labelRepository.findAll().stream()
                 .map(labelMapper::toDto)
                 .toList();
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("X-Total-Count", String.valueOf(labels.size()));
+        headers.add("Access-Control-Expose-Headers", "X-Total-Count"); // важно для CORS
+        
+        return new ResponseEntity<>(labels, headers, HttpStatus.OK);
     }
     @PostMapping
     public ResponseEntity<LabelDTO> create(@Valid @RequestBody LabelCreateDTO dto) {
