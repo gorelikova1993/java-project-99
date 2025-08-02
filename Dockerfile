@@ -1,26 +1,26 @@
 # Стадия 1: Сборка приложения
-   FROM eclipse-temurin:21-jdk AS builder
+FROM eclipse-temurin:21-jdk AS builder
 
-   # Устанавливаем рабочую директорию
-   WORKDIR /app
+# Устанавливаем рабочую директорию
+WORKDIR /app
 
-   # Копируем все необходимые файлы
-   COPY . .
+# Копируем всё содержимое проекта в контейнер
+COPY . .
 
-   # Делаем gradlew исполняемым
-   RUN chmod +x gradlew
+# Делаем gradlew исполняемым
+RUN chmod +x gradlew
 
-   # Собираем приложение без тестов и Gradle Daemon
-   RUN ./gradlew clean build -x test --no-daemon && ls -l build/libs
+# Собираем приложение без тестов и без демона
+RUN ./gradlew clean build -x test --no-daemon && ls -l build/libs
 
-   # Стадия 2: Запуск приложения
-   FROM eclipse-temurin:21-jre
+# Стадия 2: Запуск приложения
+FROM eclipse-temurin:21-jre
 
-   # Устанавливаем рабочую директорию
-   WORKDIR /app
+# Устанавливаем рабочую директорию
+WORKDIR /app
 
-   # Копируем JAR-файл из стадии сборки
-   COPY --from=builder /app/build/libs/app-0.0.1-SNAPSHOT.jar app.jar
+# Копируем собранный jar-файл из предыдущей стадии
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-   # Указываем команду для запуска приложения
-   CMD ["java", "-Xmx256m", "-Xms128m", "-jar", "app.jar"]
+# Команда запуска приложения
+CMD ["java", "-Xmx256m", "-Xms128m", "-jar", "app.jar"]
