@@ -19,8 +19,8 @@ import org.springframework.security.core.Authentication;
 @AllArgsConstructor
 @Slf4j
 public class AuthController {
-    private  AuthenticationManager authenticationManager;
-    private  JwtUtils jwtUtils;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequestDto dto) {
         var authInputToken = new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword());

@@ -9,6 +9,7 @@ import hexlet.code.model.User;
 import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
+import hexlet.code.exception.BadRequestException;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -46,8 +47,11 @@ public abstract class TaskMapper {
     public abstract TaskCreateDTO toDto(Task task);
     // ======== Вспомогательные методы ниже ==========
     protected User getAssignee(Long id) {
+        if (id == null) {
+            throw new BadRequestException("Поле assignee обязательно для заполнения");
+        }
         return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found: " + id));
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден: " + id));
     }
     protected TaskStatus getTaskStatus(String statusName) {
         return taskStatusRepository.findByName(statusName)

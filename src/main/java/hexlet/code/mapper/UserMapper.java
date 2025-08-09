@@ -27,7 +27,6 @@ public interface  UserMapper {
     default void encryptPassword(@MappingTarget User user,
                                  UserCreateDto dto,
                                  @Context PasswordEncoder encoder) {
-        System.out.println("Шифруем пароль: " + dto.getPassword());
         String rawPassword = dto.getPassword();
         user.setPassword(encoder.encode(rawPassword));
     }

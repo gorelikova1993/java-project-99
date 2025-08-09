@@ -30,6 +30,7 @@ import java.util.List;
 public class TaskController {
     private final TaskRepository taskRepository;
     private final TaskMapper taskMapper;
+    
     @GetMapping
     public ResponseEntity<List<Task>> getAll(@RequestParam(required = false) String titleCont,
                                              @RequestParam(required = false) Long assigneeId,
@@ -61,7 +62,8 @@ public class TaskController {
     @PostMapping
     public ResponseEntity<Task> create(@Valid @RequestBody TaskCreateDTO taskCreateDTO) {
         Task task = taskMapper.toEntity(taskCreateDTO);
-        return ResponseEntity.ok(taskRepository.save(task));
+        task = taskRepository.save(task);
+        return ResponseEntity.status(201).body(task);
     }
     
     @PutMapping("/{id}")

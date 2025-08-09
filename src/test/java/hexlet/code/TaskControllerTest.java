@@ -111,7 +111,7 @@ public class TaskControllerTest {
                         jwt.claim("sub", testUser.getEmail())))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(testTask)))
-                .andExpect(status().isOk()).andReturn();
+                .andExpect(status().isCreated()).andReturn();
         var body = result.getResponse().getContentAsString();
         // Проверяем, что возвращаемая задача соответствует ожидаемой
         assertThatJson(body).node("name").isEqualTo("Test title");

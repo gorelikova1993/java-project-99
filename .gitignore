@@ -1,6 +1,7 @@
 /.idea/
 .idea/
 app/.gradle
+.gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -46,4 +47,6 @@ bin/
 /app/jte-classes/
 /jte-classes/
 /node_modules/
+/.gradle/
+/.gradle/
 /.gradle/
