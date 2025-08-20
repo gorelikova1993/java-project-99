@@ -10,9 +10,11 @@ import hexlet.code.repository.LabelRepository;
 import hexlet.code.repository.TaskStatusRepository;
 import hexlet.code.repository.UserRepository;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
@@ -39,6 +41,7 @@ public abstract class TaskMapper {
     
     @Mapping(target = "name", source = "title")
     @Mapping(target = "description", source = "content")
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateEntity(TaskUpdateDTO dto, @MappingTarget Task task);
     
     @Mapping(target = "title", source = "name")
