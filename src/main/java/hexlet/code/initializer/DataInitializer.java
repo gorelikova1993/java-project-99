@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    
     @Override
     public void run(String... args) throws Exception {
         String adminEmail = "hexlet@example.com";
