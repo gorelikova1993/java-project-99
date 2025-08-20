@@ -1,5 +1,6 @@
 package hexlet.code.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.GeneratedValue;
@@ -51,4 +52,28 @@ public class Task {
             inverseJoinColumns = @JoinColumn(name = "label_id")
     )
     private Set<Label> labels = new HashSet<>();
+    
+    @JsonProperty("title")
+    public String getJsonTitle() {
+        return this.name;
+    }
+    
+    @JsonProperty("content")
+    public String getJsonContent() {
+        return this.description;
+    }
+    
+    @JsonProperty("status")
+    public String getJsonStatus() {
+        return this.taskStatus != null ? this.taskStatus.getSlug() : null;
+    }
+    
+    @JsonProperty("taskLabelIds")
+    public java.util.Set<Long> getJsonTaskLabelIds() {
+        if (this.labels == null) {
+            return java.util.Set.of();
+        }
+        return this.labels.stream().map(hexlet.code.model.Label::getId)
+                .collect(java.util.stream.Collectors.toSet());
+    }
 }
