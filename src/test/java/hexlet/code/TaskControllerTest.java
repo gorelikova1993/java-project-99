@@ -91,9 +91,9 @@ public class TaskControllerTest {
                 jwt.claim("sub", testUser.getEmail())))).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
         // Проверяем, что возвращаемая задача соответствует ожидаемому
-        assertThatJson(body).node("name").isEqualTo("Test title");
-        assertThatJson(body).node("description").isEqualTo("Test content");
-        assertThatJson(body).node("taskStatus.name").isEqualTo("ToReview");
+        assertThatJson(body).node("title").isEqualTo("Test title");
+        assertThatJson(body).node("content").isEqualTo("Test content");
+        assertThatJson(body).node("status").isEqualTo("to_review");
     }
     @Test
     void testCreateTask() throws Exception {
@@ -114,8 +114,8 @@ public class TaskControllerTest {
                 .andExpect(status().isCreated()).andReturn();
         var body = result.getResponse().getContentAsString();
         // Проверяем, что возвращаемая задача соответствует ожидаемой
-        assertThatJson(body).node("description").isEqualTo("Test content");
-        assertThatJson(body).node("taskStatus.name").isEqualTo("ToReview");
+        assertThatJson(body).node("content").isEqualTo("Test content");
+        assertThatJson(body).node("status").isEqualTo("to_review");
     }
     @Test
     void testUpdateTask() throws Exception {
@@ -130,8 +130,8 @@ public class TaskControllerTest {
                 .content(om.writeValueAsString(updatedTask))).andExpect(status().isOk()).andReturn();
         var body = result.getResponse().getContentAsString();
         // Проверяем, что имя задачи обновлено
-        assertThatJson(body).node("name").isEqualTo("Updated Task Name");
-        assertThatJson(body).node("description").isEqualTo("Updated Description");
+        assertThatJson(body).node("title").isEqualTo("Updated Task Name");
+        assertThatJson(body).node("content").isEqualTo("Updated Description");
     }
     @Test
     void testDeleteTask() throws Exception {
@@ -161,7 +161,7 @@ public class TaskControllerTest {
         var body = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         // Проверяем, что в ответе только одна задача
         assertThatJson(body).isArray().hasSize(1);
-        assertThatJson(body).node("[0].name").isEqualTo("Create login form");
+        assertThatJson(body).node("[0].title").isEqualTo("Create login form");
     }
     @Test
     void testFilterByAssigneeAndStatus() throws Exception {
@@ -175,6 +175,6 @@ public class TaskControllerTest {
         var body = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         // Ожидаем, что вернётся исходная задача
         assertThatJson(body).isArray().hasSize(1);
-        assertThatJson(body).node("[0].name").isEqualTo("Test title");
+        assertThatJson(body).node("[0].title").isEqualTo("Test title");
     }
 }

@@ -1,5 +1,6 @@
 package hexlet.code.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -34,9 +35,12 @@ public class Task {
     @NotBlank
     @Size(min = 1)
     @EqualsAndHashCode.Include
+    @JsonIgnore
     private String name;
     private int index;
+    @JsonIgnore
     private String description;
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "task_status_id")
     private TaskStatus taskStatus;
@@ -45,6 +49,7 @@ public class Task {
     private User assignee;
     @CreatedDate
     private LocalDate createdAt;
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "task_labels",
@@ -75,5 +80,9 @@ public class Task {
         }
         return this.labels.stream().map(hexlet.code.model.Label::getId)
                 .collect(java.util.stream.Collectors.toSet());
+    }
+    @JsonProperty("assignee_id")
+    public Long getAssigneeId() {
+        return this.assignee != null ? this.assignee.getId() : null;
     }
 }
