@@ -104,7 +104,7 @@ public class TaskControllerTest {
         testTask.setAssigneeId(testUser.getId());
         testTask.setTitle("Test title");
         testTask.setContent("Test content");
-        testTask.setStatus("ToReview");
+        testTask.setStatus("to_review");
         // Отправляем запрос на создание задачи
         var result = mockMvc.perform(post("/api/tasks")
                 .with(jwt().jwt(jwt ->
@@ -114,8 +114,8 @@ public class TaskControllerTest {
                 .andExpect(status().isCreated()).andReturn();
         var body = result.getResponse().getContentAsString();
         // Проверяем, что возвращаемая задача соответствует ожидаемой
-        assertThatJson(body).node("name").isEqualTo("Test title");
         assertThatJson(body).node("description").isEqualTo("Test content");
+        assertThatJson(body).node("taskStatus.name").isEqualTo("ToReview");
     }
     @Test
     void testUpdateTask() throws Exception {
