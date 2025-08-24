@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Table(name = "tasks")
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
