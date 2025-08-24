@@ -27,7 +27,6 @@ public class Label {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, unique = true, length = 1000)
-    @EqualsAndHashCode.Include
     private String name;
     @Column(nullable = false)
     @CreatedDate

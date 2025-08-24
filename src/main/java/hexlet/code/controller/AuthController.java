@@ -2,6 +2,7 @@ package hexlet.code.controller;
 
 import hexlet.code.dto.LoginRequestDto;
 import hexlet.code.util.JwtUtils;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtils jwtUtils;
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequestDto dto) {
+    public ResponseEntity<String> login(@RequestBody @Valid LoginRequestDto dto) {
         var authInputToken = new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword());
         // Аутентифицируем
         Authentication authentication = authenticationManager.authenticate(authInputToken);

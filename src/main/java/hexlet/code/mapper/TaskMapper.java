@@ -36,7 +36,6 @@ public abstract class TaskMapper {
     @Mapping(target = "assignee", expression = "java(getAssignee(taskCreateDTO.getAssigneeId()))")
     @Mapping(target = "taskStatus", expression = "java(getTaskStatusBySlug(taskCreateDTO.getStatus()))")
     @Mapping(target = "labels", expression = "java(getLabels(taskCreateDTO.getLabelIds()))")
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDate.now())")
     public abstract Task toEntity(TaskCreateDTO taskCreateDTO);
     
     @Mapping(target = "name", source = "title")

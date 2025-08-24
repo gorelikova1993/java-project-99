@@ -21,14 +21,12 @@ public class JwtUtils {
     private SecretKey key;
     // 🕒 Время жизни токена — например, 1 день
     private static final long EXPIRATION = ChronoUnit.DAYS.getDuration().toMillis();
-    public static final Logger LOGGER = LoggerFactory.getLogger(JwtUtils.class);
     @PostConstruct
     public void init() {
         // base64 decode ключа и создаём ключ из него
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
     }
     public String generateToken(String email) {
-        LOGGER.info("JWT Key: {}", key.toString());
         return Jwts.builder()
                 .setSubject(email)
                 .setExpiration(Date.from(Instant.now().plusSeconds(86400)))
