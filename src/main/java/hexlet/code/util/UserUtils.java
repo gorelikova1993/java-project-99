@@ -5,7 +5,6 @@ import hexlet.code.repository.TaskRepository;
 import hexlet.code.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -13,9 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @AllArgsConstructor
 public class UserUtils {
-    @Autowired
     private UserRepository userRepository;
-    @Autowired
     private TaskRepository taskRepository;
     public User getCurrentUser() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();

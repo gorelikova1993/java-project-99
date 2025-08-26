@@ -1,6 +1,7 @@
 package hexlet.code.mapper;
 
 import hexlet.code.dto.TaskCreateDTO;
+import hexlet.code.dto.TaskDTO;
 import hexlet.code.dto.TaskUpdateDTO;
 import hexlet.code.model.Label;
 import hexlet.code.model.Task;
@@ -31,26 +32,30 @@ public abstract class TaskMapper {
     @Autowired
     private TaskStatusRepository taskStatusRepository;
     
+    // ----------- Входящие DTO → Entity ------------
+    
     @Mapping(target = "name", source = "title")
     @Mapping(target = "description", source = "content")
-    @Mapping(target = "assignee", expression = "java(getAssignee(taskCreateDTO.getAssigneeId()))")
-    @Mapping(target = "taskStatus", expression = "java(getTaskStatusBySlug(taskCreateDTO.getStatus()))")
-    @Mapping(target = "labels", expression = "java(getLabels(taskCreateDTO.getLabelIds()))")
-    public abstract Task toEntity(TaskCreateDTO taskCreateDTO);
+    @Mapping(target = "assignee", expression = "java(getAssignee(dto.getAssigneeId()))")
+    @Mapping(target = "taskStatus", expression = "java(getTaskStatusBySlug(dto.getStatus()))")
+    @Mapping(target = "labels", expression = "java(getLabels(dto.getLabelIds()))")
+    public abstract Task toEntity(TaskCreateDTO dto);
     
     @Mapping(target = "name", source = "title")
     @Mapping(target = "description", source = "content")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateEntity(TaskUpdateDTO dto, @MappingTarget Task task);
     
+    // ----------- Entity → Исходящий DTO ------------
+    
     @Mapping(target = "title", source = "name")
     @Mapping(target = "content", source = "description")
-    @Mapping(target = "status", source = "taskStatus.name")
+    @Mapping(target = "status", source = "taskStatus.slug")
     @Mapping(target = "assigneeId", source = "assignee.id")
     @Mapping(target = "labelIds", expression = "java(getLabelIds(task))")
-    public abstract TaskCreateDTO toDto(Task task);
+    public abstract TaskDTO toDto(Task task);
     
-    // ======== Вспомогательные методы ниже ==========
+    // ========== Вспомогательные методы ==========
     protected User getAssignee(Long id) {
         if (id == null) {
             return null;
@@ -60,6 +65,9 @@ public abstract class TaskMapper {
     }
     
     protected TaskStatus getTaskStatusBySlug(String slug) {
+        if (slug == null) {
+            return null;
+        }
         return taskStatusRepository.findBySlug(slug)
                 .orElseThrow(() -> new RuntimeException("Task status not found: " + slug));
     }

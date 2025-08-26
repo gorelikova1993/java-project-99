@@ -1,7 +1,9 @@
 package hexlet.code.controller;
 
 import hexlet.code.dto.TaskStatusCreateDTO;
+import hexlet.code.dto.TaskStatusDTO;
 import hexlet.code.dto.TaskStatusUpdateDto;
+import hexlet.code.mapper.TaskStatusMapper;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.repository.TaskStatusRepository;
 import jakarta.validation.Valid;
@@ -23,9 +25,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TaskStatusController {
     private final TaskStatusRepository repository;
+    private  final TaskStatusMapper taskStatusMapper;
     @GetMapping
-    public ResponseEntity<List<TaskStatus>>  getAll() {
-        var statuses = repository.findAll();
+    public ResponseEntity<List<TaskStatusDTO>>  getAll() {
+        var statuses = repository.findAll()
+                .stream()
+                .map(taskStatusMapper::toDto)
+                .toList();
         
         var headers = new org.springframework.http.HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(statuses.size()));
@@ -34,28 +40,24 @@ public class TaskStatusController {
         return ResponseEntity.ok().headers(headers).body(statuses);
     }
     @GetMapping("/{id}")
-    public ResponseEntity<TaskStatus> get(@PathVariable Long id) {
+    public ResponseEntity<TaskStatusDTO> get(@PathVariable Long id) {
         return repository.findById(id)
+                .map(taskStatusMapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     @PostMapping
-    public ResponseEntity<TaskStatus> create(@Valid @RequestBody TaskStatusCreateDTO dto) {
-        TaskStatus status = new TaskStatus();
-        status.setName(dto.getName());
-        status.setSlug(dto.getSlug());
-        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(status));
+    public ResponseEntity<TaskStatusDTO> create(@Valid @RequestBody TaskStatusCreateDTO dto) {
+        TaskStatus entity = taskStatusMapper.toEntity(dto);
+        TaskStatus saved = repository.save(entity);
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskStatusMapper.toDto(saved));
     }
     @PutMapping("/{id}")
-    public ResponseEntity<TaskStatus> update(@PathVariable Long id, @RequestBody TaskStatusUpdateDto dto) {
-        return repository.findById(id).map(status -> {
-            if (dto.getName() != null) {
-                status.setName(dto.getName());
-            }
-            if (dto.getSlug() != null) {
-                status.setSlug(dto.getSlug());
-            }
-            return ResponseEntity.ok(repository.save(status));
+    public ResponseEntity<TaskStatusDTO> update(@PathVariable Long id, @RequestBody TaskStatusUpdateDto dto) {
+        return repository.findById(id).map(entity -> {
+            taskStatusMapper.updateEntity(dto, entity);
+            TaskStatus saved = repository.save(entity);
+            return ResponseEntity.ok(taskStatusMapper.toDto(saved));
         }).orElse(ResponseEntity.notFound().build());
     }
     @DeleteMapping("/{id}")

@@ -1,6 +1,7 @@
 package hexlet.code.controller;
 
 import hexlet.code.dto.TaskCreateDTO;
+import hexlet.code.dto.TaskDTO;
 import hexlet.code.dto.TaskUpdateDTO;
 import hexlet.code.exception.ResourceNotFoundException;
 import hexlet.code.mapper.TaskMapper;
@@ -32,10 +33,10 @@ public class TaskController {
     private final TaskMapper taskMapper;
     
     @GetMapping
-    public ResponseEntity<List<Task>> getAll(@RequestParam(required = false) String titleCont,
-                                             @RequestParam(required = false) Long assigneeId,
-                                             @RequestParam(required = false) String status,
-                                             @RequestParam(required = false) Long labelId) {
+    public ResponseEntity<List<TaskDTO>> getAll(@RequestParam(required = false) String titleCont,
+                                                @RequestParam(required = false) Long assigneeId,
+                                                @RequestParam(required = false) String status,
+                                                @RequestParam(required = false) Long labelId) {
         var spec = allOf(
                 TaskSpecification.hasTitleContaining(titleCont),
                 TaskSpecification.hasAssigneeId(assigneeId),
@@ -43,7 +44,10 @@ public class TaskController {
                 TaskSpecification.hasLabelId(labelId)
         );
         
-        var tasks = taskRepository.findAll(spec);
+        var tasks = taskRepository.findAll(spec)
+                .stream()
+                .map(taskMapper::toDto)
+                .toList();
         
         var headers = new org.springframework.http.HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(tasks.size()));
@@ -53,25 +57,27 @@ public class TaskController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Task> get(@PathVariable Long id) {
+    public ResponseEntity<TaskDTO> get(@PathVariable Long id) {
         return taskRepository.findById(id)
+                .map(taskMapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     
     @PostMapping
-    public ResponseEntity<Task> create(@Valid @RequestBody TaskCreateDTO taskCreateDTO) {
+    public ResponseEntity<TaskDTO> create(@Valid @RequestBody TaskCreateDTO taskCreateDTO) {
         Task task = taskMapper.toEntity(taskCreateDTO);
         task = taskRepository.save(task);
-        return ResponseEntity.status(201).body(task);
+        return ResponseEntity.status(201).body(taskMapper.toDto(task));
     }
     
     @PutMapping("/{id}")
-    public ResponseEntity<Task> update(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO taskUpdateDTO) {
+    public ResponseEntity<TaskDTO> update(@PathVariable Long id, @Valid @RequestBody TaskUpdateDTO taskUpdateDTO) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Task not found with id " + id));
         taskMapper.updateEntity(taskUpdateDTO, task);
-        return ResponseEntity.ok(taskRepository.save(task));
+        Task saved = taskRepository.save(task);
+        return ResponseEntity.ok(taskMapper.toDto(saved));
     }
     
     @DeleteMapping("/{id}")

@@ -2,6 +2,7 @@ package hexlet.code;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hexlet.code.dto.TaskStatusCreateDTO;
+import hexlet.code.dto.TaskStatusDTO;
 import hexlet.code.dto.TaskStatusUpdateDto;
 import hexlet.code.model.TaskStatus;
 import hexlet.code.model.User;
@@ -95,7 +96,7 @@ public class TaskStatusControllerTest {
                 .andReturn();
         String body = response.getResponse().getContentAsString();
         System.out.println("Response: " + body);
-        TaskStatus actualStatus = om.readValue(body, TaskStatus.class);
+        TaskStatusDTO actualStatus = om.readValue(body, TaskStatusDTO.class);
         TaskStatus expectedStatus = taskStatusRepository.findBySlug("new")
                 .orElseThrow(() -> new AssertionError("TaskStatus not found in database"));
         assertThat(actualStatus.getId()).isEqualTo(expectedStatus.getId());
