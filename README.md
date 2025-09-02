@@ -3,8 +3,6 @@
 
 [![Maintainability](https://qlty.sh/badges/abf80239-94c5-4368-9997-9fc42d9f4d26/maintainability.svg)](https://qlty.sh/gh/gorelikova1993/projects/java-project-99)
 
-[![Coverage Status](https://coveralls.io/repos/github/gorelikova1993/java-project-99/badge.svg?branch=main)](https://coveralls.io/github/gorelikova1993/java-project-99?branch=main)
-
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=gorelikova1993_java-project-99&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=gorelikova1993_java-project-99)
 
 https://java-project-99-enom.onrender.com/
