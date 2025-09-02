@@ -1,49 +1,65 @@
 package hexlet.code.config;
 
+import hexlet.code.service.AppUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 @AllArgsConstructor
 public class SecurityConfig {
-    private final JwtFilter jwtFilter;
+    private final JwtDecoder jwtDecoder;
+    private final PasswordEncoder passwordEncoder;
+    private final AppUserDetailsService appUserDetailsService;
+    
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    // Добавляем AuthenticationManager как бин
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/api/login", "/api/users", "/assets/**", "/index.html",
-                                "/api/pages/*", "/api/pages", "/swagger-ui.html", "/swagger-ui/**", "/v3/**",
-                                "/h2-console/**", "/proxy/**").permitAll()
-                        .anyRequest().authenticated()
-                )
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   HandlerMappingIntrospector introspector) throws Exception {
+        return http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.disable())
-                .logout(logout -> logout.disable())
-                .formLogin(form -> form.disable())
+                .authorizeHttpRequests(auth -> auth
+                        // Сохраняю твои permitAll пути
+                        .requestMatchers("/", "/api/login", "/api/users",
+                                "/assets/**", "/index.html",
+                                "/api/pages/*", "/api/pages",
+                                "/swagger-ui.html", "/swagger-ui/**", "/v3/**",
+                                "/h2-console/**", "/proxy/**").permitAll()
+                        .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(basic -> basic.disable());
-        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
+                .authenticationProvider(daoAuthProvider())
+                .oauth2ResourceServer(rs -> rs.jwt(jwt -> jwt.decoder(jwtDecoder)))
+                .httpBasic(Customizer.withDefaults())
+                .build();
     }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        var builder = http.getSharedObject(AuthenticationManagerBuilder.class);
+        builder.authenticationProvider(daoAuthProvider()); // ← ВАЖНО
+        return builder.build();
+    }
+    
+    @Bean
+    public AuthenticationProvider daoAuthProvider() {
+        var provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(appUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+    
 }

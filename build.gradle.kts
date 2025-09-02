@@ -47,6 +47,7 @@ dependencies {
 	implementation("org.flywaydb:flyway-database-postgresql:11.10.1")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+    implementation ("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
 	runtimeOnly("com.h2database:h2")
 
