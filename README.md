@@ -5,7 +5,6 @@
 
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=gorelikova1993_java-project-99&metric=coverage)](https://sonarcloud.io/summary/new_code?id=gorelikova1993_java-project-99)
 
-
 https://java-project-99-enom.onrender.com/
 
 # Task Manager
