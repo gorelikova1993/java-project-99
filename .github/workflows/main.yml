@@ -20,12 +20,10 @@ jobs:
           distribution: 'temurin' # Alternative distribution options are available
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          fetch-depth: 0
       - name: Execute Gradle build
-        run: ./gradlew -p app build
+        run: ./gradlew build
       - name: Generate coverage report
-        run: make -C app report
+        run: make report
       - name: Cache SonarQube packages
         uses: actions/cache@v4
         with:
@@ -41,4 +39,4 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew -p app build sonar --info
+        run: ./gradlew build sonar --info
