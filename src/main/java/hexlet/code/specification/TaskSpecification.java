@@ -1,43 +1,42 @@
 package hexlet.code.specification;
 
+import hexlet.code.dto.TaskFilterDTO;
 import hexlet.code.model.Task;
-import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
+@Component
 public class TaskSpecification {
-    public static Specification<Task> hasTitleContaining(String titlePart) {
-        return (root, query, cb) -> {
-            if (Objects.isNull(titlePart)) {
-                return null;
-            }
-            return cb.like(cb.lower(root.get("name")), "%" + titlePart.toLowerCase() + "%");
-        };
+    
+    public Specification<Task> build(TaskFilterDTO filters) {
+        return withAssignee(filters.getAssigneeId())
+                .and(withTitleCont(filters.getTitleCont()))
+                .and(withStatus(filters.getStatus())
+                        .and(withLabel(filters.getLabelId())));
     }
-    public static Specification<Task> hasAssigneeId(Long assigneeId) {
-        return (root, query, cb) -> {
-            if (Objects.isNull(assigneeId)) {
-                return null;
-            }
-            return cb.equal(root.get("assignee").get("id"), assigneeId);
-        };
+    
+    private Specification<Task> withTitleCont(String substring) {
+        return (root, query, cb) -> substring == null
+                ? cb.conjunction()
+                : cb.like(cb.lower(root.get("name")), "%" + substring.toLowerCase() + "%");
     }
-    public static Specification<Task> hasStatusSlug(String statusSlug) {
-        return (root, query, cb) -> {
-            if (Objects.isNull(statusSlug)) {
-                return null;
-            }
-            return cb.equal(root.get("taskStatus").get("slug"), statusSlug);
-        };
+    
+    private Specification<Task> withAssignee(Long assigneeId) {
+        return (root, query, cb) -> assigneeId == null
+                ? cb.conjunction()
+                : cb.equal(root.join("assignee").get("id"), assigneeId);
     }
-    public static Specification<Task> hasLabelId(Long labelId) {
-        return (root, query, cb) -> {
-            if (Objects.isNull(labelId)) {
-                return null;
-            }
-            Join<Object, Object> labels = root.join("labels");
-            return cb.equal(labels.get("id"), labelId);
-        };
+    
+    private Specification<Task> withStatus(String status) {
+        return (root, query, cb) -> status == null
+                ? cb.conjunction()
+                : cb.equal(root.join("taskStatus", JoinType.INNER).get("slug"), status);
+    }
+    
+    private Specification<Task> withLabel(Long labelId) {
+        return (root, query, cb) -> labelId == null
+                ? cb.conjunction()
+                : cb.equal(root.join("labels", JoinType.INNER).get("id"), labelId);
     }
 }

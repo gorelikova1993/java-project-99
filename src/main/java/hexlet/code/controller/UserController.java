@@ -45,7 +45,7 @@ public class UserController {
         
         var headers = new org.springframework.http.HttpHeaders();
         headers.add("X-Total-Count", String.valueOf(users.size()));
-        headers.add("Access-Control-Expose-Headers", "X-Total-Count");
+//        headers.add("Access-Control-Expose-Headers", "X-Total-Count");
         
         return ResponseEntity.ok().headers(headers).body(users);
     }
