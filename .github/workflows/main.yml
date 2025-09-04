@@ -26,6 +26,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           ./gradlew sonarqube \
+            -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.projectKey=gorelikova1993_java-project-99 \
+            -Dsonar.organization=gorelikova1993 \
             -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
             -Dsonar.token=${SONAR_TOKEN}
