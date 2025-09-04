@@ -1,33 +1,44 @@
-name: Java CI
-
+name: JavaCI
 on:
-  - push
-  - pull_request
-
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
 jobs:
   build:
+    name: Build and analyze
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
+      - uses: actions/checkout@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
-      - name: Build and test with Gradle (with coverage)
-        uses: gradle/gradle-build-action@v2
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
         with:
-          gradle-version: 8.9
-          arguments: jacocoTestReport
-      - name: SonarCloud analysis
+          java-version: 21
+          distribution: 'temurin' # Alternative distribution options are available
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          fetch-depth: 0
+      - name: Execute Gradle build
+        run: ./app/gradlew -p app build
+      - name: Generate coverage report
+        run: make -C app report
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+      - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          ./gradlew sonarqube \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.projectKey=gorelikova1993_java-project-99 \
-            -Dsonar.organization=gorelikova1993 \
-            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
-            -Dsonar.token=${SONAR_TOKEN}
+        run: ./app/gradlew -p app build sonar --info
