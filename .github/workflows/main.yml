@@ -36,7 +36,13 @@ jobs:
           path: ~/.gradle/caches
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
           restore-keys: ${{ runner.os }}-gradle
-      - name: Build and analyze
+      - name: SonarCloud analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew build sonar --info
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >
+          ./gradlew build sonar --info
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=gorelikova1993
+          -Dsonar.projectKey=gorelikova1993_java-project-99
+          -Dsonar.token=$SONAR_TOKEN
